@@ -1,0 +1,11 @@
+$kind: http-request
+method: GET
+url: "{{baseUrl}}/api/booking/my"
+body:
+  type: json
+  content: ""
+order: 3000
+auth:
+  type: bearer
+  credentials:
+    token: "{{authToken}}"

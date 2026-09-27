@@ -1,0 +1,26 @@
+$kind: http-request
+name: 'Update Event (Admin)'
+method: PUT
+url: '{{baseUrl}}/api/events/{{eventId}}'
+order: 4000
+auth:
+  type: bearer
+  credentials:
+    - key: token
+      value: '{{authToken}}'
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "title": "Music Festival 2025 - Updated",
+      "description": "Updated description",
+      "date": "2025-12-01T18:00:00.000Z",
+      "location": "New York",
+      "cateogary": "music",
+      "totalSeats": 600,
+      "ticketPrice": 109.99,
+      "imageUrl": "https://example.com/image.jpg"
+    }

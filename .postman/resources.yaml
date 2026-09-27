@@ -1,0 +1,7 @@
+# Use this workspace to collaborate
+workspace:
+  id: 32411f8a-4fbf-4270-8593-e2504e79cdbd
+
+localResources:
+  collections:
+    - ../server/Eventora_Postman_Collection.json

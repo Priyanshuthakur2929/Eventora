@@ -1,0 +1,11 @@
+$kind: http-request
+method: GET
+url: '{{baseUrl}}/api/events'
+order: 1000
+queryParams:
+  - key: category
+    value: music
+    disabled: true
+  - key: location
+    value: New York
+    disabled: true

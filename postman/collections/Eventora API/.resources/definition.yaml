@@ -1,0 +1,7 @@
+$kind: collection
+description: API collection for the Eventora event booking platform
+variables:
+  baseUrl: http://localhost:5500
+  authToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhYjE0YzIxMDJiYzA4Y2ExMjA4NDcxOCIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc5MDAwNDQ5NywiZXhwIjoxNzkwNDM2NDk3fQ.Nqri998QH1tgAeF3g8RTCKCe7-0z_E4PCHCIh7wFdRs'
+  eventId: ""
+  bookingId: ""
