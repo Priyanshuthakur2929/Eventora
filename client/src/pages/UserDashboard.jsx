@@ -2,7 +2,9 @@ import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import api from '../utils/axios';
 import { Link, useNavigate } from 'react-router-dom';
-import { FaTicketAlt, FaTimesCircle } from 'react-icons/fa';
+import { FaTicketAlt, FaTimesCircle, FaUserTie, FaClock, FaCheckCircle } from 'react-icons/fa';
+
+const emptyForm = { organizationName: '', phone: '', description: '' };
 
 const UserDashboard = () => {
     const { user } = useContext(AuthContext);
@@ -11,12 +13,23 @@ const UserDashboard = () => {
     const [loading, setLoading] = useState(true);
     const displayName = user?.name || user?.email?.split('@')[0] || 'User';
 
+    // Organizer request state
+    const [organizer, setOrganizer] = useState({
+        role: user?.role || 'user',
+        organizerStatus: user?.organizerStatus || 'none',
+    });
+    const [showForm, setShowForm] = useState(false);
+    const [form, setForm] = useState(emptyForm);
+    const [submitting, setSubmitting] = useState(false);
+    const [formError, setFormError] = useState('');
+
     useEffect(() => {
         if (!user) {
             navigate('/login');
             return;
         }
         fetchBookings();
+        fetchOrganizerStatus();
     }, [user, navigate]);
 
     const fetchBookings = async () => {
@@ -27,6 +40,16 @@ const UserDashboard = () => {
             console.error('Error fetching bookings', error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    // Always read the latest role/status from the server, not from the login token
+    const fetchOrganizerStatus = async () => {
+        try {
+            const { data } = await api.get('/organizer/status');
+            setOrganizer({ role: data.role, organizerStatus: data.organizerStatus });
+        } catch (error) {
+            console.error('Error fetching organizer status', error);
         }
     };
 
@@ -41,7 +64,36 @@ const UserDashboard = () => {
         }
     };
 
+    const handleFormChange = (e) => {
+        setForm({ ...form, [e.target.name]: e.target.value });
+    };
+
+    const submitOrganizerRequest = async (e) => {
+        e.preventDefault();
+        setFormError('');
+        setSubmitting(true);
+        try {
+            await api.post('/organizer/request', {
+                organizationName: form.organizationName.trim(),
+                phone: form.phone.trim(),
+                description: form.description.trim(),
+            });
+            setOrganizer((prev) => ({ ...prev, organizerStatus: 'pending' }));
+            setShowForm(false);
+            setForm(emptyForm);
+        } catch (error) {
+            setFormError(error.response?.data?.message || 'Could not send your request. Please try again.');
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
     if (loading) return <div className="text-center py-20 text-xl font-semibold">Loading dashboard...</div>;
+
+    const isPlainUser = organizer.role === 'user';
+    const isOrganizer = organizer.role === 'organizer';
+    const canRequest = isPlainUser && ['none', 'rejected'].includes(organizer.organizerStatus);
+    const isPending = isPlainUser && organizer.organizerStatus === 'pending';
 
     return (
         <div className="max-w-6xl mx-auto">
@@ -56,6 +108,128 @@ const UserDashboard = () => {
                     </p>
                 </div>
             </div>
+
+            {/* Organizer access */}
+            {(canRequest || isPending || isOrganizer) && (
+                <div className="bg-white rounded-2xl shadow-sm p-6 sm:p-8 mb-8 border border-gray-100">
+                    {isOrganizer && (
+                        <div className="flex items-start gap-3 text-green-700">
+                            <FaCheckCircle className="mt-1 shrink-0" />
+                            <div>
+                                <h2 className="text-lg font-bold text-gray-900">You are an approved organizer</h2>
+                                <p className="text-sm text-gray-500">You can now list and manage your own programs.</p>
+                            </div>
+                        </div>
+                    )}
+
+                    {isPending && (
+                        <div className="flex items-start gap-3 text-yellow-700">
+                            <FaClock className="mt-1 shrink-0" />
+                            <div>
+                                <h2 className="text-lg font-bold text-gray-900">Organizer request pending</h2>
+                                <p className="text-sm text-gray-500">An admin will review your request. You will get access once it is approved.</p>
+                            </div>
+                        </div>
+                    )}
+
+                    {canRequest && (
+                        <>
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                                <div className="flex items-start gap-3">
+                                    <FaUserTie className="text-gray-700 text-xl mt-1 shrink-0" />
+                                    <div>
+                                        <h2 className="text-lg font-bold text-gray-900">Want to list your own programs?</h2>
+                                        <p className="text-sm text-gray-500">
+                                            {organizer.organizerStatus === 'rejected'
+                                                ? 'Your last request was not approved. You can update your details and apply again.'
+                                                : 'Send a short request. An admin reviews it before you can create programs.'}
+                                        </p>
+                                    </div>
+                                </div>
+                                {!showForm && (
+                                    <button
+                                        onClick={() => setShowForm(true)}
+                                        className="bg-gray-900 hover:bg-black text-white font-bold py-2.5 px-6 rounded-lg transition shadow-md shrink-0"
+                                    >
+                                        Become an Organizer
+                                    </button>
+                                )}
+                            </div>
+
+                            {showForm && (
+                                <form onSubmit={submitOrganizerRequest} className="mt-6 space-y-4 max-w-xl">
+                                    <div>
+                                        <label htmlFor="organizationName" className="block text-sm font-semibold text-gray-700 mb-1">
+                                            Organization name
+                                        </label>
+                                        <input
+                                            id="organizationName"
+                                            name="organizationName"
+                                            type="text"
+                                            required
+                                            maxLength={100}
+                                            value={form.organizationName}
+                                            onChange={handleFormChange}
+                                            className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-gray-900"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label htmlFor="phone" className="block text-sm font-semibold text-gray-700 mb-1">
+                                            Phone number
+                                        </label>
+                                        <input
+                                            id="phone"
+                                            name="phone"
+                                            type="tel"
+                                            required
+                                            pattern="[0-9]{10}"
+                                            title="Enter a 10-digit phone number"
+                                            value={form.phone}
+                                            onChange={handleFormChange}
+                                            className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-gray-900"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label htmlFor="description" className="block text-sm font-semibold text-gray-700 mb-1">
+                                            Description or proof
+                                        </label>
+                                        <textarea
+                                            id="description"
+                                            name="description"
+                                            required
+                                            rows={4}
+                                            maxLength={500}
+                                            placeholder="What events do you plan to host? Add a website, social page, or past event link if you have one."
+                                            value={form.description}
+                                            onChange={handleFormChange}
+                                            className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-gray-900"
+                                        />
+                                    </div>
+
+                                    {formError && <p className="text-sm text-red-600">{formError}</p>}
+
+                                    <div className="flex items-center gap-3">
+                                        <button
+                                            type="submit"
+                                            disabled={submitting}
+                                            className="bg-gray-900 hover:bg-black disabled:opacity-60 text-white font-bold py-2.5 px-6 rounded-lg transition shadow-md"
+                                        >
+                                            {submitting ? 'Sending...' : 'Send request'}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => { setShowForm(false); setFormError(''); }}
+                                            className="text-gray-600 hover:text-gray-900 font-semibold py-2.5 px-4"
+                                        >
+                                            Cancel
+                                        </button>
+                                    </div>
+                                </form>
+                            )}
+                        </>
+                    )}
+                </div>
+            )}
 
             <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl sm:text-2xl font-bold text-gray-800 flex items-center gap-2 sm:gap-3">

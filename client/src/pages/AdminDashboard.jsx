@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import api from '../utils/axios';
 import { useNavigate } from 'react-router-dom';
+import AdminOrganizerRequests from '../components/AdminOrganizerRequest';
 
 const AdminDashboard = () => {
     const { user } = useContext(AuthContext);
@@ -129,6 +130,9 @@ const AdminDashboard = () => {
                     <div className="w-12 h-12 bg-yellow-100 text-yellow-600 rounded-full flex items-center justify-center text-xl font-bold">⏳</div>
                 </button>
             </div>
+
+            {/* Organizer access requests (new) */}
+            <AdminOrganizerRequests />
 
             {showEventForm && (
                 <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 mb-8 animation-slideDown">

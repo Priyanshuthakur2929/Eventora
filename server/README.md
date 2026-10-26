@@ -81,3 +81,86 @@ cd client
 npm run dev
 ```
 *(Client will run on a local port provided by Vite, typically `http://localhost:5173`)* 
+
+// README.md for SELL PURPOSE
+# Eventora - Online Event Booking Platform
+
+Eventora is a full-stack web application for discovering events and booking tickets online. Organizers can list events, and attendees can browse and book them from any device.
+
+**Live demo:** https://eventora-smoky.vercel.app
+
+<!-- Add 3-4 screenshots here after you capture them:
+![Home](./docs/screenshots/home.png)
+![Events](./docs/screenshots/events.png)
+![Booking](./docs/screenshots/booking.png)
+-->
+
+## Features
+
+<!-- Keep only what your app really does. Buyers check this list against the demo. -->
+- Browse and search upcoming events
+- Event details page with date, venue, and price
+- Online ticket booking flow
+- User authentication (sign up / log in)
+- Responsive design for mobile and desktop
+- REST API with MongoDB storage
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Frontend | React |
+| Backend | Node.js (Express) |
+| Database | MongoDB |
+| Hosting | Vercel |
+| Version control | Git and GitHub |
+
+## Project Structure
+
+```
+eventora/
+├── client/          # React frontend
+├── server/          # Node.js backend (API)
+├── docs/            # Screenshots and extra documentation
+├── README.md
+└── SETUP.md         # Detailed installation and deployment guide
+```
+
+## Quick Start
+
+```bash
+# 1. Clone
+git clone https://github.com/<your-username>/eventora.git
+cd eventora
+
+# 2. Backend
+cd server
+npm install
+cp .env.example .env      # then fill in your values
+npm start
+
+# 3. Frontend (new terminal)
+cd client
+npm install
+cp .env.example .env      # then fill in your values
+npm run dev
+```
+
+The frontend runs on `http://localhost:5173` (Vite) or `http://localhost:3000` (Create React App), and the API on `http://localhost:5500`.
+
+See [SETUP.md](./SETUP.md) for the full guide, including MongoDB setup and deployment.
+
+## Roadmap
+
+- Payment gateway integration (Razorpay / Stripe)
+- Analytics dashboard for organizers
+- Mobile app integration
+
+## License
+
+<!-- Choose one before selling: MIT for open source, or "All rights reserved" / a commercial license for paid sales. -->
+Copyright (c) 2026 Priyanshu Raj. All rights reserved.
+
+## Author
+
+**Priyanshu Raj**, B.Tech CSE, Greater Noida Institute of Technology

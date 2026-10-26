@@ -16,12 +16,23 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['user', 'admin'],
+    enum: ['user', 'organizer', 'admin'],
     default: 'user',
   },
   isVerified: {
     type: Boolean,
     default: false,
+  },
+  organizerStatus: {
+    type: String,
+    enum: ['none', 'pending', 'approved', 'rejected'],
+    default: 'none',
+  },
+  organizerRequest: {
+    organizationName: String,
+    phone: String,
+    description: String,
+    requestedAt: Date,
   },
 });
 

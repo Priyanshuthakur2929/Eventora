@@ -11,6 +11,7 @@ const EventDetail = () => {
     const [event, setEvent] = useState(null);
     const [loading, setLoading] = useState(true);
     const [bookingLoading, setBookingLoading] = useState(false);
+    const [resendLoading, setResendLoading] = useState(false);
     const [otp, setOtp] = useState('');
     const [showOTP, setShowOTP] = useState(false);
     const [error, setError] = useState('');
@@ -29,6 +30,12 @@ const EventDetail = () => {
         };
         fetchEvent();
     }, [id]);
+
+    useEffect(() => {
+        if (event?.title) {
+            document.title = `${event.title} | Eventora`;
+        }
+    }, [event?.title]);
 
     const handleBooking = async () => {
         if (!user) {
@@ -61,6 +68,27 @@ const EventDetail = () => {
             setError(typeof responseMessage === 'string' ? responseMessage : 'Booking failed');
         } finally {
             setBookingLoading(false);
+        }
+    };
+
+    const handleResendOTP = async () => {
+        setResendLoading(true);
+        setError('');
+        setSuccessMsg('');
+
+        try {
+            await api.post('/bookings/send-otp');
+            setSuccessMsg('A new OTP has been sent to your email.');
+        } catch (err) {
+            if (err.response?.status === 401) {
+                logout();
+                navigate('/login');
+                return;
+            }
+            const responseMessage = err.response?.data?.message || err.response?.data;
+            setError(typeof responseMessage === 'string' ? responseMessage : 'Could not resend OTP. Please try again.');
+        } finally {
+            setResendLoading(false);
         }
     };
 
@@ -148,6 +176,14 @@ const EventDetail = () => {
                                     onChange={(e) => setOtp(e.target.value)}
                                     maxLength="6"
                                 />
+                                <button
+                                    type="button"
+                                    onClick={handleResendOTP}
+                                    disabled={resendLoading || bookingLoading}
+                                    className="mt-2 text-sm font-semibold text-gray-700 underline underline-offset-2 hover:text-black disabled:cursor-not-allowed disabled:opacity-50"
+                                >
+                                    {resendLoading ? 'Sending...' : 'Resend OTP'}
+                                </button>
                             </div>
                         )}
 
